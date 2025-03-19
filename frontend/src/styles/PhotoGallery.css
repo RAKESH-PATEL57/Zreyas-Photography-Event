@@ -118,3 +118,110 @@
       max-width: 95%;
     }
   } */
+
+
+  /* Add this to your PhotoGallery.css file */
+
+/* Gallery-wide loading container */
+.gallery-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  width: 100%;
+  position: relative;
+}
+
+/* Overall gallery progress */
+.gallery-total-progress {
+  width: 80%;
+  max-width: 400px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.gallery-progress-bar {
+  height: 8px;
+  background-color: rgba(30, 144, 255, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  box-shadow: 0 0 10px rgba(30, 144, 255, 0.3);
+}
+
+.gallery-progress-fill {
+  height: 100%;
+  background-color: #1e90ff;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  background-image: linear-gradient(
+    90deg,
+    #1e90ff 0%,
+    #00bfff 50%,
+    #1e90ff 100%
+  );
+  background-size: 200% 100%;
+  animation: progress-animation 2s linear infinite;
+}
+
+.gallery-progress-text {
+  color: #1e90ff;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Photo-specific loading styles */
+.gallery-image-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.gallery-image.loading {
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+
+/* Required keyframes for animations */
+@keyframes progress-animation {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 200% 0%;
+  }
+}
+
+/* Enhanced winner badge with animation */
+.winner-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: linear-gradient(45deg, #ffd700, #ffcc00);
+  color: #000;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+  animation: pulse-winner 2s infinite;
+  z-index: 10;
+}
+
+@keyframes pulse-winner {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.9);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+  }
+}

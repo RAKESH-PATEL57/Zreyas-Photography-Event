@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import "../styles/PhotoGallery.css"; // Keep existing CSS
-import FuturisticLoader from "./FuturisticLoader"; // Keep your existing loader for section loading
+import "../styles/PhotoGallery.css"; // Import the CSS
+import "../styles/ImageLoading.css"; // Import the image loading CSS
+import FuturisticLoader from "./FuturisticLoader"; // Import the loader component
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -21,80 +22,43 @@ const PhotoGallery = ({
   showOnlyViewMode = false,
 }) => {
   const [expandedPhoto, setExpandedPhoto] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [operationInProgress, setOperationInProgress] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true); // Only for first-time gallery loading
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [imagesLoaded, setImagesLoaded] = useState(0);
+  const [loadedImages, setLoadedImages] = useState({}); // Track which images have loaded
+  const [loadingPhotoIds, setLoadingPhotoIds] = useState(new Set()); // Track photos with loading actions
 
-  // Track loading state for each individual photo
-  const [photoLoadingStates, setPhotoLoadingStates] = useState({});
-
+  // Initialize loading state for the gallery
   useEffect(() => {
     if (photos.length === 0) {
       setInitialLoading(false);
       return;
     }
+    
+    // Reset counter when photos array changes
+    setImagesLoaded(0);
+    setLoadedImages({});
+    
+    // Only show the futuristic loader for initial page load
+    // Set a timeout to ensure it doesn't show forever
+    const timeout = setTimeout(() => {
+      setInitialLoading(false);
+    }, 5000);
+    
+    return () => clearTimeout(timeout);
+  }, [photos]);
 
-    // Initialize loading states for all photos
-    const initialLoadingStates = {};
-    photos.forEach((photo) => {
-      initialLoadingStates[photo._id] = { loading: true, progress: 0 };
-    });
-    setPhotoLoadingStates(initialLoadingStates);
-
-    if (initialLoading) {
-      setImagesLoaded(0);
-
-      const timeout = setTimeout(() => {
-        setInitialLoading(false);
-      }, 5000);
-
-      return () => clearTimeout(timeout);
-    }
-  }, [photos, initialLoading]);
-
-  // Simulate progressive loading with a progress effect
-  useEffect(() => {
-    // Create interval for each photo that's still loading
-    const progressIntervals = {};
-
-    Object.entries(photoLoadingStates).forEach(([photoId, state]) => {
-      if (state.loading && state.progress < 90) {
-        // Only go up to 90% with the animation, the final 10% happens when the image actually loads
-        progressIntervals[photoId] = setInterval(() => {
-          setPhotoLoadingStates((prevStates) => ({
-            ...prevStates,
-            [photoId]: {
-              ...prevStates[photoId],
-              progress: Math.min(
-                90,
-                prevStates[photoId].progress + Math.random() * 10
-              ),
-            },
-          }));
-        }, 300 + Math.random() * 500); // Random interval for more natural loading effect
-      }
-    });
-
-    return () => {
-      // Clear all intervals on cleanup
-      Object.values(progressIntervals).forEach((interval) =>
-        clearInterval(interval)
-      );
-    };
-  }, [photoLoadingStates]);
-
+  // Handle image load events
   const handleImageLoaded = (photoId) => {
-    // Complete the loading progress and mark as loaded
-    setPhotoLoadingStates((prevStates) => ({
-      ...prevStates,
-      [photoId]: { loading: false, progress: 100 },
+    setLoadedImages(prev => ({
+      ...prev,
+      [photoId]: true
     }));
-
-    setImagesLoaded((prev) => {
+    
+    setImagesLoaded(prev => {
       const newCount = prev + 1;
+      // If all images are loaded, ensure initialLoading is set to false
       if (newCount >= photos.length) {
         setInitialLoading(false);
       }
@@ -102,14 +66,22 @@ const PhotoGallery = ({
     });
   };
 
+  // Handle image load error
   const handleImageError = (photoId) => {
-    // Mark as error but still "loaded" to not block UI
-    setPhotoLoadingStates((prevStates) => ({
-      ...prevStates,
-      [photoId]: { loading: false, progress: 100, error: true },
+    // Mark failed images as "loaded" to remove loading indicator
+    setLoadedImages(prev => ({
+      ...prev,
+      [photoId]: true
     }));
-
-    handleImageLoaded(photoId); // Count as loaded for overall progress
+    
+    // Count errors as "loaded" to avoid stuck loading state
+    setImagesLoaded(prev => {
+      const newCount = prev + 1;
+      if (newCount >= photos.length) {
+        setInitialLoading(false);
+      }
+      return newCount;
+    });
   };
 
   const handlePhotoClick = (photo) => {
@@ -135,22 +107,96 @@ const PhotoGallery = ({
     return photo.participantUniqueString === participantUniqueString;
   };
 
+  // Wrapper for onLike to handle loading state
+  const handleLike = async (photoId) => {
+    // Set this specific photo to loading state
+    setLoadingPhotoIds(prev => new Set(prev).add(photoId));
+    
+    try {
+      await onLike(photoId);
+    } finally {
+      // Remove loading state after action is complete
+      setLoadingPhotoIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(photoId);
+        return newSet;
+      });
+    }
+  };
+
+  // Wrapper for onDeletePhoto to handle loading state
+  const handleAdminDeletePhoto = async (photoId) => {
+    // Set this specific photo to loading state
+    setLoadingPhotoIds(prev => new Set(prev).add(photoId));
+    
+    try {
+      await onDeletePhoto(photoId);
+    } finally {
+      // Remove loading state after action is complete
+      setLoadingPhotoIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(photoId);
+        return newSet;
+      });
+    }
+  };
+
+  // Wrapper for onDeclareWinner to handle loading state
+  const handleDeclareWinner = async (photoId) => {
+    setLoadingPhotoIds(prev => new Set(prev).add(photoId));
+    
+    try {
+      await onDeclareWinner(photoId);
+    } finally {
+      setLoadingPhotoIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(photoId);
+        return newSet;
+      });
+    }
+  };
+
+  // Wrapper for onRemoveWinner to handle loading state
+  const handleRemoveWinner = async (photoId) => {
+    if (!window.confirm("Are you sure you want to remove winner status?")) {
+      return;
+    }
+    
+    setLoadingPhotoIds(prev => new Set(prev).add(photoId));
+    
+    try {
+      await onRemoveWinner(photoId);
+      if (expandedPhoto && expandedPhoto._id === photoId) {
+        closeExpandedView();
+      }
+    } finally {
+      setLoadingPhotoIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(photoId);
+        return newSet;
+      });
+    }
+  };
+
   // Helper function to get optimized image URL with transformations
-  const getOptimizedImageUrl = (photoUrl, size = "medium") => {
-    if (!photoUrl || !photoUrl.includes("cloudinary.com")) {
+  const getOptimizedImageUrl = (photoUrl, size = 'medium') => {
+    // If not a Cloudinary URL, return as is
+    if (!photoUrl || !photoUrl.includes('cloudinary.com')) {
       return photoUrl;
     }
-
+    
+    // Define size presets
     const sizes = {
-      thumbnail: "c_thumb,w_300,h_300",
-      small: "w_600",
-      medium: "w_1200",
-      large: "w_2000",
+      thumbnail: 'c_thumb,w_300,h_300',
+      small: 'w_600',
+      medium: 'w_1200',
+      large: 'w_2000'
     };
-
-    const baseUrl = photoUrl.split("/upload/");
+    
+    // Split URL to insert transformations
+    const baseUrl = photoUrl.split('/upload/');
     if (baseUrl.length !== 2) return photoUrl;
-
+    
     return `${baseUrl[0]}/upload/${sizes[size]}/${baseUrl[1]}`;
   };
 
@@ -161,9 +207,11 @@ const PhotoGallery = ({
       return;
     }
 
-    setOperationInProgress(true);
     setError("");
     setSuccessMessage("");
+    
+    // Set this specific photo to loading state
+    setLoadingPhotoIds(prev => new Set(prev).add(photoId));
 
     try {
       const response = await axios.delete(`${API_URL}api/photos/${photoId}`, {
@@ -173,12 +221,15 @@ const PhotoGallery = ({
       if (response.data.success) {
         setSuccessMessage("Photo deleted successfully");
 
+        // If the deleted photo is currently expanded, close the expanded view
         if (expandedPhoto && expandedPhoto._id === photoId) {
           closeExpandedView();
         }
 
+        // Call the callback to update the parent component's state
         onPhotoDeleted(photoId);
 
+        // Clear success message after 3 seconds
         setTimeout(() => {
           setSuccessMessage("");
         }, 3000);
@@ -186,38 +237,27 @@ const PhotoGallery = ({
     } catch (err) {
       setError(err.response?.data?.message || "Failed to delete photo");
 
+      // Clear error message after 3 seconds
       setTimeout(() => {
         setError("");
       }, 3000);
     } finally {
-      setOperationInProgress(false);
+      // Remove loading state after action is complete
+      setLoadingPhotoIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(photoId);
+        return newSet;
+      });
     }
   };
 
-  // Render futuristic loading animation for individual photos
-  const renderPhotoLoadingAnimation = (photoId) => {
-    const loadingState = photoLoadingStates[photoId];
-    if (!loadingState || !loadingState.loading) return null;
-
-    const progress = loadingState.progress || 0;
-
-    return (
-      <div className="photo-loading-overlay">
-        <div className="photo-loading-container">
-          <div className="photo-loading-progress-bar">
-            <div
-              className="photo-loading-progress"
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-          <div className="photo-loading-pulse"></div>
-          <div className="photo-loading-text">{Math.round(progress)}%</div>
-        </div>
-      </div>
-    );
+  // Check if a specific photo is in loading state
+  const isPhotoLoading = (photoId) => {
+    return loadingPhotoIds.has(photoId);
   };
 
-  if (initialLoading || operationInProgress) {
+  // Show main futuristic loader ONLY for first-time gallery loading
+  if (initialLoading && imagesLoaded === 0) {
     return <FuturisticLoader />;
   }
 
@@ -235,16 +275,24 @@ const PhotoGallery = ({
           onClick={() => handlePhotoClick(photo)}
         >
           <div className="gallery-image-container">
-            {/* Show loading animation while image is loading */}
-            {photoLoadingStates[photo._id]?.loading &&
-              renderPhotoLoadingAnimation(photo._id)}
-
+            {/* Check if this specific photo is in loading state OR if it hasn't loaded yet */}
+            {(isPhotoLoading(photo._id) || !loadedImages[photo._id]) && (
+              <div className="image-loading-overlay">
+                {/* Use FuturisticLoader for loading actions like liking or deleting */}
+                {isPhotoLoading(photo._id) ? (
+                  <div className="mini-futuristic-loader">
+                    <FuturisticLoader />
+                  </div>
+                ) : (
+                  <div className="image-loading-spinner"></div>
+                )}
+              </div>
+            )}
+            
             <img
-              src={getOptimizedImageUrl(photo.path, "medium")}
+              src={getOptimizedImageUrl(photo.path, 'medium')}
               alt={photo.caption || "Photo"}
-              className={`gallery-image ${
-                photoLoadingStates[photo._id]?.loading ? "loading" : ""
-              }`}
+              className={`gallery-image ${loadedImages[photo._id] ? 'loaded' : 'loading'}`}
               loading="lazy"
               onLoad={() => handleImageLoaded(photo._id)}
               onError={() => handleImageError(photo._id)}
@@ -276,63 +324,58 @@ const PhotoGallery = ({
             <div className="action-buttons">
               {isAdmin && (
                 <div className="admin-actions">
-                  <button
+                <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onLike(photo._id);
+                      handleLike(photo._id);
                     }}
                     className={`like-button ${hasLiked(photo) ? "liked" : ""}`}
+                    disabled={isPhotoLoading(photo._id)}
                   >
-                    <span className="button-icon">
-                      {hasLiked(photo) ? "💔" : "❤️"}
-                    </span>
+                    <span className="button-icon">{hasLiked(photo) ? "💔" : "❤️"}</span>
                     <span>{hasLiked(photo) ? "Unlike" : "Like"}</span>
                   </button>
-                  <div className="superadmin-actionBtns">
-                    {isSuperAdmin && !photo.isWinner && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDeclareWinner(photo._id);
-                        }}
-                        className="winner-button"
-                      >
-                        <span className="button-icon">🏆</span>
-                        <span>Declare Winner</span>
-                      </button>
-                    )}
-                    {isSuperAdmin && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDeletePhoto(photo._id);
-                        }}
-                        className="delete-button admin-delete"
-                      >
-                        <span className="button-icon">🗑️</span>
-                        <span>Delete</span>
-                      </button>
-                    )}
 
-                    {isSuperAdmin && photo.isWinner && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (
-                            window.confirm(
-                              "Are you sure you want to remove winner status?"
-                            )
-                          ) {
-                            onRemoveWinner(photo._id);
-                          }
-                        }}
-                        className="remove-winner-button"
-                      >
-                        <span className="button-icon">❌</span>
-                        <span>Remove Winner</span>
-                      </button>
-                    )}
-                  </div>
+                  {isSuperAdmin && !photo.isWinner && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeclareWinner(photo._id);
+                      }}
+                      className="winner-button"
+                      disabled={isPhotoLoading(photo._id)}
+                    >
+                      <span className="button-icon">🏆</span>
+                      <span>Declare Winner</span>
+                    </button>
+                  )}
+                  {isSuperAdmin && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAdminDeletePhoto(photo._id);
+                      }}
+                      className="delete-button admin-delete"
+                      disabled={isPhotoLoading(photo._id)}
+                    >
+                      <span className="button-icon">🗑️</span>
+                      <span>Delete</span>
+                    </button>
+                  )}
+
+                  {isSuperAdmin && photo.isWinner && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveWinner(photo._id);
+                      }}
+                      className="remove-winner-button"
+                      disabled={isPhotoLoading(photo._id)}
+                    >
+                      <span className="button-icon">❌</span>
+                      <span>Remove Winner</span>
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -353,7 +396,7 @@ const PhotoGallery = ({
                   <button
                     onClick={(e) => handleDeletePhoto(photo._id, e)}
                     className="delete-button"
-                    disabled={operationInProgress}
+                    disabled={isPhotoLoading(photo._id)}
                   >
                     <span className="button-icon">🗑️</span>
                     <span>Delete</span>
@@ -367,11 +410,26 @@ const PhotoGallery = ({
 
       {expandedPhoto && (
         <div className="expanded-view" onClick={closeExpandedView}>
+          {/* Loading indicator for expanded image */}
+          {(isPhotoLoading(expandedPhoto._id) || !loadedImages[expandedPhoto._id]) && (
+            <div className="image-loading-overlay" style={{position: "absolute", zIndex: 10}}>
+              {isPhotoLoading(expandedPhoto._id) ? (
+                <div className="expanded-futuristic-loader">
+                  <FuturisticLoader />
+                </div>
+              ) : (
+                <div className="image-loading-spinner" style={{width: "3rem", height: "3rem", borderWidth: "4px"}}></div>
+              )}
+            </div>
+          )}
+          
           <img
-            src={getOptimizedImageUrl(expandedPhoto.path, "large")}
+            src={getOptimizedImageUrl(expandedPhoto.path, 'large')}
             alt={expandedPhoto.caption || "Expanded photo"}
-            className="expanded-image"
+            className={`expanded-image ${loadedImages[expandedPhoto._id] ? 'loaded' : 'loading'}`}
             onClick={(e) => e.stopPropagation()}
+            onLoad={() => handleImageLoaded(expandedPhoto._id)}
+            onError={() => handleImageError(expandedPhoto._id)}
           />
           <button className="close-button" onClick={closeExpandedView}>
             ×
@@ -398,10 +456,23 @@ const PhotoGallery = ({
             <div className="expanded-actions">
               {isAdmin && (
                 <div className="admin-actions">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleLike(expandedPhoto._id);
+                    }}
+                    className={`like-button ${hasLiked(expandedPhoto) ? "liked" : ""}`}
+                    disabled={isPhotoLoading(expandedPhoto._id)}
+                  >
+                    <span className="button-icon">{hasLiked(expandedPhoto) ? "💔" : "❤️"}</span>
+                    <span>{hasLiked(expandedPhoto) ? "Unlike" : "Like"}</span>
+                  </button>
+                  
                   {isSuperAdmin && !expandedPhoto.isWinner && (
                     <button
-                      onClick={() => onDeclareWinner(expandedPhoto._id)}
+                      onClick={() => handleDeclareWinner(expandedPhoto._id)}
                       className="winner-button"
+                      disabled={isPhotoLoading(expandedPhoto._id)}
                     >
                       <span className="button-icon">🏆</span>
                       <span>Declare Winner</span>
@@ -410,20 +481,23 @@ const PhotoGallery = ({
 
                   {isSuperAdmin && expandedPhoto.isWinner && (
                     <button
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            "Are you sure you want to remove winner status?"
-                          )
-                        ) {
-                          onRemoveWinner(expandedPhoto._id);
-                          closeExpandedView(); // Close expanded view after action
-                        }
-                      }}
+                      onClick={() => handleRemoveWinner(expandedPhoto._id)}
                       className="remove-winner-button"
+                      disabled={isPhotoLoading(expandedPhoto._id)}
                     >
                       <span className="button-icon">❌</span>
                       <span>Remove Winner</span>
+                    </button>
+                  )}
+                  
+                  {isSuperAdmin && (
+                    <button
+                      onClick={() => handleAdminDeletePhoto(expandedPhoto._id)}
+                      className="delete-button admin-delete"
+                      disabled={isPhotoLoading(expandedPhoto._id)}
+                    >
+                      <span className="button-icon">🗑️</span>
+                      <span>Delete</span>
                     </button>
                   )}
                 </div>
@@ -450,7 +524,7 @@ const PhotoGallery = ({
                         handleDeletePhoto(expandedPhoto._id, e);
                       }}
                       className="delete-button"
-                      disabled={operationInProgress}
+                      disabled={isPhotoLoading(expandedPhoto._id)}
                     >
                       <span className="button-icon">🗑️</span>
                       <span>Delete</span>

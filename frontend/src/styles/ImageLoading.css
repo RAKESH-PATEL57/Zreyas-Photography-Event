@@ -1,0 +1,39 @@
+/* Add these styles to your ImageLoading.css file */
+
+/* Styling for the mini futuristic loader */
+.mini-futuristic-loader {
+    /* border: 2px solid red; */
+    transform: scale(0.5);
+    width: 80px;
+    height: 80px;
+  }
+  
+  .mini-futuristic-loader .futuristic-loader {
+    background: transparent;
+    padding: 0;
+  }
+  
+  .mini-futuristic-loader .aperture-container {
+    transform: scale(0.6);
+  }
+  
+  .mini-futuristic-loader .progress-bar-container,
+  .mini-futuristic-loader .loading-text {
+    display: none;
+  }
+  
+  /* Styling for expanded view loader */
+  .expanded-futuristic-loader {
+    transform: scale(0.7);
+    z-index: 20;
+  }
+  
+  .expanded-futuristic-loader .futuristic-loader {
+    background: transparent;
+  }
+  
+  /* General button disabled state */
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }

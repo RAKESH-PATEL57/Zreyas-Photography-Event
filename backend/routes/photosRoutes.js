@@ -89,9 +89,9 @@ router.post('/upload', upload.single('photo'), async (req, res) => {
       resource_type: 'image',
       format: 'webp',
       quality: 60,
-      // transformation: [
-      //   { width: 2000, crop: 'limit' } // Limit max width while maintaining aspect ratio
-      // ]
+      transformation: [
+        { width: 2000, crop: 'limit' } // Limit max width while maintaining aspect ratio
+      ]
     });
     
     // Create the photo record in the database with Cloudinary URL
