@@ -1,0 +1,120 @@
+  /* Add this to your existing PhotoGallery.css file
+
+/* Individual photo loading styles 
+.gallery-image-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.photo-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  backdrop-filter: blur(5px);
+}
+
+.photo-loading-container {
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.photo-loading-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  margin-bottom: 10px;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0, 128, 255, 0.5);
+}
+
+.photo-loading-progress {
+  height: 100%;
+  background: linear-gradient(90deg, #0088ff, #00ffff);
+  transition: width 0.3s ease-out;
+  box-shadow: 0 0 15px rgba(0, 195, 255, 0.8);
+}
+
+.photo-loading-pulse {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 153, 255, 0.2);
+  margin-bottom: 10px;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+.photo-loading-text {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  text-shadow: 0 0 10px rgba(0, 195, 255, 0.8);
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    box-shadow: 0 0 0 0 rgba(0, 153, 255, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(0, 153, 255, 0);
+  }
+  100% {
+    transform: scale(0.8);
+    box-shadow: 0 0 0 0 rgba(0, 153, 255, 0);
+  }
+}
+
+/* Slight transparency for loading images 
+.gallery-image.loading {
+  opacity: 0;
+  transition: opacity 0.5s ease-in;
+}
+
+/* Fade-in effect for loaded images 
+.gallery-image:not(.loading) {
+  opacity: 1;
+  transition: opacity 0.5s ease-in;
+}
+
+/* Add a smooth transition when loading animation is complete 
+.gallery-image-container:hover .photo-loading-overlay {
+  background: rgba(0, 0, 0, 0.4);
+}
+  /* Responsive adjustments 
+  @media (max-width: 768px) {
+    .photo-gallery {
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    
+    .expanded-details {
+      width: 90%;
+      max-width: none;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .photo-gallery {
+      grid-template-columns: 1fr;
+    }
+    
+    .admin-actions, .participant-actions {
+      flex-direction: column;
+    }
+    
+    .expanded-image {
+      max-width: 95%;
+    }
+  } */
