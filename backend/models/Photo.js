@@ -10,10 +10,6 @@ const photoSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  cloudinaryPublicId: {
-    type: String,
-    required: true
-  },
   caption: {
     type: String
   },

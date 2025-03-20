@@ -10,7 +10,7 @@ const WinnersGallery = () => {
   const [winners, setWinners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [userType, setUserType] = useState("visitor"); // Default to visitor
+  // const [userType, setUserType] = useState("visitor"); // Default to visitor
   const location = useLocation();
 
   // Determine the user type and appropriate back link on component mount
@@ -22,20 +22,20 @@ const WinnersGallery = () => {
     const adminData = sessionStorage.getItem("adminData");
 
     if (participantData) {
-      setUserType("participant");
+      // setUserType("participant");
       console.log("Participant detected");
     } else if (adminData) {
       const adminInfo = JSON.parse(adminData);
       // Check if the admin is a superadmin
       if (adminInfo && adminInfo.role === "superadmin") {
-        setUserType("superadmin");
+        // setUserType("superadmin");
         console.log("Super Admin detected");
       } else {
-        setUserType("admin");
+        // setUserType("admin");
         console.log("Admin detected");
       }
     } else {
-      setUserType("visitor");
+      // setUserType("visitor");
       console.log("Visitor detected");
     }
   }, []);
@@ -108,28 +108,28 @@ const WinnersGallery = () => {
   }, [location]);
 
   // Function to get the back link text and URL based on user type
-  const getBackLink = () => {
-    switch (userType) {
-      case "superadmin":
-      case "admin":
-        return {
-          text: "Back to Admin Dashboard",
-          path: "/admin-dashboard"
-        };
-      case "participant":
-        return {
-          text: "Back to Participant Dashboard",
-          path: "/participant-dashboard"
-        };
-      default:
-        return {
-          text: "Back to Home",
-          path: "/"
-        };
-    }
-  };
+  // const getBackLink = () => {
+  //   switch (userType) {
+  //     case "superadmin":
+  //     case "admin":
+  //       return {
+  //         text: "Back to Admin Dashboard",
+  //         path: "/admin-dashboard"
+  //       };
+  //     case "participant":
+  //       return {
+  //         text: "Back to Participant Dashboard",
+  //         path: "/participant-dashboard"
+  //       };
+  //     default:
+  //       return {
+  //         text: "Back to Home",
+  //         path: "/"
+  //       };
+  //   }
+  // };
 
-  const backLink = getBackLink();
+  // const backLink = getBackLink();
 
   return (
     <div className="winners-page">
@@ -189,11 +189,11 @@ const WinnersGallery = () => {
           </div>
         )}
 
-        <div className="page-actions">
+        {/* <div className="page-actions">
           <Link to={backLink.path} className="back-link">
             <span className="arrow-icon back">←</span> {backLink.text}
           </Link>
-        </div>
+        </div> */}
       </div>
       <Footer />
     </div>

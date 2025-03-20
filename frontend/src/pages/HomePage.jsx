@@ -11,9 +11,9 @@ const HomePage = () => {
       <div className="hero-section">
         <div className="hero-content">
           <h1>Welcome to Clickerzz Event</h1>
-          <p>The ultimate photography competition</p>
+          <p>The ultimate photography Event</p>
           <div className="hero-buttons">
-            <Link to="/participant-login" className="primary-button">
+             <Link to="/participant-login" className="primary-button">
               <span className="button-icon">📸</span>
               <span>Participant Login</span>
             </Link>
@@ -28,17 +28,17 @@ const HomePage = () => {
         <div className="feature-card">
           <div className="feature-icon">📸</div>
           <h3>Upload Photos</h3>
-          <p>Share your best shots</p>
+          {/* <p>Share your best shots</p> */}
         </div>
         <div className="feature-card">
           <div className="feature-icon">❤️</div>
           <h3>Get Likes</h3>
-          <p>Admins like your photos</p>
+          {/* <p>Admins like your photos</p> */}
         </div>
         <div className="feature-card">
           <div className="feature-icon">🏆</div>
           <h3>Win Prize</h3>
-          <p>Highest likes win Prize </p>
+          {/* <p>Highest likes win Prize </p> */}
         </div>
       </div>
       {/* <div className="winners-preview">

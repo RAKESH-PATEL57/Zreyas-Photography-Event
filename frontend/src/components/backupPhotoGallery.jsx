@@ -451,7 +451,7 @@ const PhotoGallery = ({
         </div>
       ))}
 
-      {/* {expandedPhoto && (
+      {expandedPhoto && (
         <div className="expanded-view" onClick={closeExpandedView}>
           {isPhotoLoading(expandedPhoto._id) && (
             <div className="expanded-futuristic-loader">
@@ -569,7 +569,7 @@ const PhotoGallery = ({
             </div>
           </div>
         </div>
-      )} */}
+      )}
     </div>
   );
 };

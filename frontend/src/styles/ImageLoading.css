@@ -6,8 +6,8 @@
     transform: scale(0.5);
     width: 80px;
     height: 80px;
+    /* display: none; */
   }
-  
   .mini-futuristic-loader .futuristic-loader {
     background: transparent;
     padding: 0;

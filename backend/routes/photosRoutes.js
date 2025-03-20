@@ -6,14 +6,18 @@ const Photo = require('../models/Photo');
 const Admin = require('../models/Admin');
 const fs = require('fs');
 const { verifyToken, checkSuperAdmin } = require('./adminRoutes');
-const cloudinary = require('cloudinary').v2;
+const AWS = require('aws-sdk');
+const sharp = require('sharp');
 
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+// Configure AWS S3
+AWS.config.update({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION
 });
+
+const s3 = new AWS.S3();
+const BUCKET_NAME = process.env.AWS_BUCKET_NAME;
 
 // Configure multer storage for temporary files
 const storage = multer.diskStorage({
@@ -64,6 +68,54 @@ const ensureDirectoriesExist = () => {
 
 ensureDirectoriesExist();
 
+// Helper function to upload file to S3
+const uploadToS3 = async (file, participantUniqueString) => {
+  try {
+    // Convert image to WebP format and optimize
+    const optimizedImageBuffer = await sharp(file.path)
+      .webp({ quality: 60 })
+      .resize({ width: 2000, withoutEnlargement: true }) // Resize if larger than 2000px
+      .toBuffer();
+    
+    // Create S3 key with folder structure
+    const s3Key = `photo-contest/${participantUniqueString}/${Date.now()}-${path.basename(file.filename, path.extname(file.filename))}.webp`;
+    
+    // Upload to S3
+    const params = {
+      Bucket: BUCKET_NAME,
+      Key: s3Key,
+      Body: optimizedImageBuffer,
+      ContentType: 'image/webp',
+      // ACL: 'public-read' // Make the file publicly accessible
+    };
+    
+    const result = await s3.upload(params).promise();
+    return {
+      url: result.Location,
+      key: result.Key
+    };
+  } catch (error) {
+    console.error('Error uploading to S3:', error);
+    throw error;
+  }
+};
+
+// Helper function to delete file from S3
+const deleteFromS3 = async (s3Key) => {
+  try {
+    const params = {
+      Bucket: BUCKET_NAME,
+      Key: s3Key
+    };
+    
+    await s3.deleteObject(params).promise();
+    return true;
+  } catch (error) {
+    console.error('Error deleting from S3:', error);
+    throw error;
+  }
+};
+
 // Upload a photo
 router.post('/upload', upload.single('photo'), async (req, res) => {
   try {
@@ -80,25 +132,15 @@ router.post('/upload', upload.single('photo'), async (req, res) => {
       });
     }
     
-    // Upload the file to Cloudinary
+    // Upload the file to S3
     const tempFilePath = req.file.path;
+    const s3Result = await uploadToS3(req.file, participantUniqueString);
     
-    // Use a folder structure in Cloudinary based on participant ID
-    const result = await cloudinary.uploader.upload(tempFilePath, {
-      folder: `photo-contest/${participantUniqueString}`,
-      resource_type: 'image',
-      format: 'webp',
-      quality: 60,
-      transformation: [
-        { width: 2000, crop: 'limit' } // Limit max width while maintaining aspect ratio
-      ]
-    });
-    
-    // Create the photo record in the database with Cloudinary URL
+    // Create the photo record in the database with S3 URL
     const newPhoto = new Photo({
       participantUniqueString,
-      path: result.secure_url,
-      cloudinaryPublicId: result.public_id
+      path: s3Result.url,
+      s3Key: s3Result.key  // Store S3 key for future deletion
     });
     
     await newPhoto.save();
@@ -171,12 +213,12 @@ router.delete('/:id', async (req, res) => {
       });
     }
     
-    // Delete the file from Cloudinary
-    if (photo.cloudinaryPublicId) {
+    // Delete the file from S3
+    if (photo.s3Key) {
       try {
-        await cloudinary.uploader.destroy(photo.cloudinaryPublicId);
-      } catch (cloudinaryError) {
-        console.warn('Warning: Failed to delete from Cloudinary:', cloudinaryError.message);
+        await deleteFromS3(photo.s3Key);
+      } catch (s3Error) {
+        console.warn('Warning: Failed to delete from S3:', s3Error.message);
         // Continue processing to at least remove DB entry
       }
     }
@@ -212,12 +254,12 @@ router.delete('/admin/:id', verifyToken, checkSuperAdmin, async (req, res) => {
       });
     }
     
-    // Delete the file from Cloudinary
-    if (photo.cloudinaryPublicId) {
+    // Delete the file from S3
+    if (photo.s3Key) {
       try {
-        await cloudinary.uploader.destroy(photo.cloudinaryPublicId);
-      } catch (cloudinaryError) {
-        console.warn('Warning: Failed to delete from Cloudinary:', cloudinaryError.message);
+        await deleteFromS3(photo.s3Key);
+      } catch (s3Error) {
+        console.warn('Warning: Failed to delete from S3:', s3Error.message);
         // Continue processing to at least remove DB entry
       }
     }

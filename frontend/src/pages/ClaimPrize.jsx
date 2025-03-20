@@ -71,7 +71,7 @@ const ClaimPrize = () => {
                 }
               } catch (winnerErr) {
                 // If no winner record found, we're in claim mode
-                console.log("No winner details found, in claim mode");
+                console.log("No winner details found, in claim mode" + winnerErr);
               }
             }
           } else {

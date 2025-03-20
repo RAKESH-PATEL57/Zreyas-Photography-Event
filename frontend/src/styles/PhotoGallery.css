@@ -123,7 +123,7 @@
   /* Add this to your PhotoGallery.css file */
 
 /* Gallery-wide loading container */
-.gallery-loading-container {
+/* .gallery-loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -131,24 +131,24 @@
   min-height: 300px;
   width: 100%;
   position: relative;
-}
+} */
 
 /* Overall gallery progress */
-.gallery-total-progress {
+/* .gallery-total-progress {
   width: 80%;
   max-width: 400px;
   margin-top: 20px;
   text-align: center;
-}
+} */
 
-.gallery-progress-bar {
+/* .gallery-progress-bar {
   height: 8px;
   background-color: rgba(30, 144, 255, 0.2);
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 10px;
   box-shadow: 0 0 10px rgba(30, 144, 255, 0.3);
-}
+} */
 
 .gallery-progress-fill {
   height: 100%;
@@ -174,17 +174,17 @@
 }
 
 /* Photo-specific loading styles */
-.gallery-image-container {
+/* .gallery-image-container {
   position: relative;
   overflow: hidden;
   border-radius: 8px;
   background-color: rgba(0, 0, 0, 0.1);
-}
+} */
 
-.gallery-image.loading {
+/* .gallery-image.loading {
   opacity: 0.4;
   transition: opacity 0.3s ease;
-}
+} */
 
 /* Required keyframes for animations */
 @keyframes progress-animation {

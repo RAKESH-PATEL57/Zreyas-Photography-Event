@@ -13,6 +13,7 @@ const PhotoUploader = ({ participantUniqueString, onPhotoUploaded }) => {
   const [success, setSuccess] = useState('');
   const [preview, setPreview] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef(null);
   const dropZoneRef = useRef(null);
   const abortControllerRef = useRef(null);
@@ -67,13 +68,15 @@ const PhotoUploader = ({ participantUniqueString, onPhotoUploaded }) => {
     setLoading(true);
     setError('');
     setSuccess('');
+    setUploadProgress(0);
     
     const formData = new FormData();
     formData.append('photo', file);
     formData.append('participantUniqueString', participantUniqueString);
     
     try {
-      // Apply client-side image optimization before upload
+      // Client-side optimization happens on the server with sharp
+      // We'll still apply basic compression for very large images
       const optimizedFile = await compressImage(file);
       formData.set('photo', optimizedFile);
       
@@ -84,9 +87,8 @@ const PhotoUploader = ({ participantUniqueString, onPhotoUploaded }) => {
           headers: { 'Content-Type': 'multipart/form-data' },
           signal: abortControllerRef.current.signal,
           onUploadProgress: (progressEvent) => {
-            // Optional: Add progress tracking here
             const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            console.log(`Upload progress: ${percentCompleted}%`);
+            setUploadProgress(percentCompleted);
           }
         }
       );
@@ -95,6 +97,7 @@ const PhotoUploader = ({ participantUniqueString, onPhotoUploaded }) => {
         setSuccess('Photo uploaded successfully!');
         setFile(null);
         setPreview(null);
+        setUploadProgress(0);
         
         // Notify parent component
         onPhotoUploaded(response.data.data);
@@ -115,10 +118,11 @@ const PhotoUploader = ({ participantUniqueString, onPhotoUploaded }) => {
     }
   };
 
-  // Client-side image compression
+  // Client-side image compression - only for very large images
+  // Most optimization will happen server-side with sharp
   const compressImage = async (imageFile) => {
     // Skip compression for small files
-    if (imageFile.size < 1024 * 1024) return imageFile;
+    if (imageFile.size < 2 * 1024 * 1024) return imageFile; // Only compress files larger than 2MB
     
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -144,12 +148,12 @@ const PhotoUploader = ({ participantUniqueString, onPhotoUploaded }) => {
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
           
-          // Convert to WebP with quality setting
+          // Convert to smaller format with quality setting
           canvas.toBlob(
             (blob) => {
               if (blob) {
                 const file = new File([blob], imageFile.name, {
-                  type: 'image/webp',
+                  type: imageFile.type, // Keep original type for server-side processing
                   lastModified: Date.now()
                 });
                 resolve(file);
@@ -157,7 +161,7 @@ const PhotoUploader = ({ participantUniqueString, onPhotoUploaded }) => {
                 resolve(imageFile); // Fallback to original if compression fails
               }
             },
-            'image/webp',
+            imageFile.type,
             0.8 // Quality setting (0.8 = 80%)
           );
         };
@@ -221,6 +225,18 @@ const PhotoUploader = ({ participantUniqueString, onPhotoUploaded }) => {
             </div>
           )}
         </div>
+        
+        {loading && (
+          <div className="progress-container">
+            <div className="progress-bar">
+              <div 
+                className="progress-fill" 
+                style={{ width: `${uploadProgress}%` }}
+              ></div>
+            </div>
+            <div className="progress-text">{uploadProgress}%</div>
+          </div>
+        )}
         
         <div className="form-controls">
           <div className="form-group">
