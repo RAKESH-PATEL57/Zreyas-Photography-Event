@@ -10,7 +10,7 @@ const HomePage = () => {
       <Header />
       <div className="hero-section">
         <div className="hero-content">
-          <h1>Welcome to Clickerzz Event</h1>
+          <h1>Welcome to Clickzz Event</h1>
           <p>The ultimate photography Event</p>
           <div className="hero-buttons">
              <Link to="/participant-login" className="primary-button">

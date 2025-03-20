@@ -71,8 +71,8 @@ const initAdmins = async () => {
           // }
           // adminPromises.push(
           //       Admin.create({
-          //         username: 'admin2',
-          //         password: 'admin234',
+          //         username: 'mahaveer',
+          //         password: 'mahaveer2116',
           //         isSuperAdmin: false
           //       })
           //     );
