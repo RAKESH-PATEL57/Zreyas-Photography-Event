@@ -27,9 +27,9 @@ const Footer = () => {
           
           <div className="footer-section">
             <h4>Contact</h4>
-            {/* <a href="mailto:info@clickerzz.com" className="footer-link">Rakesh Patel</a> */}
-            <a href="" className="footer-link">Rakesh Patel</a>
-            <a href="tel:+919556615902" className="footer-link">+91 9556615902</a>
+            <a href="" className="footer-link">RAKESH PATEL (4th year)</a>
+            <a href="" className="footer-link">DEEPAK MUNDARI (4th year)</a>
+            <a href="" className="footer-link">BISWNAJIT ROUT (3rd year)</a>
           </div>
         </div>
         
