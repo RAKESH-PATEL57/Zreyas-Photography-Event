@@ -7,7 +7,7 @@ const Header = () => {
       <div className="header-container" style={{display:"flex",justifyContent:"center"}}>
         <Link to="/" className="logo">
           <span className="logo-icon">📸</span>
-          <span className="logo-text">Clickerzz</span>
+          <span className="logo-text">Clickzz</span>
         </Link>
         
         {/* <nav className="main-nav">
