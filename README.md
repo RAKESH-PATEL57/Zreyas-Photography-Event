@@ -1,6 +1,6 @@
 # Photography Contest Platform
 
-A full-stack web application for organizing and managing photography competitions with fair voting mechanisms. This platform allows participants to upload photos while designated admins can vote for their favorites.
+A full-stack web application for organizing and managing photography competitions with fair voting mechanisms. This platform allows participants to upload photos while designated admins can vote for their favorites and superadmin declair the winner.
 
 ## Live Demo
 [Photography Contest Platform](https://photography-contest-q18x.onrender.com/)
@@ -115,23 +115,31 @@ A full-stack web application for organizing and managing photography competition
 ```
 photography-contest-platform/
 ├── backend/
-│   ├── controllers/
-│   ├── middlewares/
+│   ├── config/
 │   ├── models/
 │   ├── routes/
-│   ├── utils/
+│   ├── uploads/
 │   ├── index.js
-│   └── package.json
+│   ├── .gitignore
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── server.js
 ├── frontend/
 │   ├── public/
 │   ├── src/
+│   │   ├── assets/
 │   │   ├── components/
+│   │   ├── context/
 │   │   ├── pages/
-│   │   ├── services/
-│   │   ├── utils/
-│   │   ├── App.js
-│   │   └── index.js
-│   └── package.json
+│   │   ├── styles/
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   ├── .gitignore
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── vite.config.js
 └── README.md
 ```
 
