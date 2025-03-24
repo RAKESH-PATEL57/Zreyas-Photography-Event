@@ -71,12 +71,25 @@ const initAdmins = async () => {
           // }
           // adminPromises.push(
           //       Admin.create({
-          //         username: 'ankitroy50602',
-          //         password: 'Aezakmi@2023',
+          //         username: '40',
+          //         password: '40',
           //         isSuperAdmin: false
           //       })
           //     );
-      
+          // adminPromises.push(
+          //       Admin.create({
+          //         username: '41',
+          //         password: '41',
+          //         isSuperAdmin: false
+          //       })
+          //     );
+          // adminPromises.push(
+          //       Admin.create({
+          //         username: '45',
+          //         password: '45',
+          //         isSuperAdmin: false
+          //       })
+          //     );      
           await Promise.all(adminPromises);
           console.log(`${adminsToCreate} admin users created`);
             
