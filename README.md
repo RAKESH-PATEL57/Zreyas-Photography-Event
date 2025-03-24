@@ -45,7 +45,7 @@ A full-stack web application for organizing and managing photography competition
 ### Backend Setup
 1. Clone the repository
    ```
-   git clone https://github.com/yourusername/photography-contest-platform.git
+   git clone https://github.com/RAKESH-PATEL57/Zreyas-Photography-Event.git
    cd photography-contest-platform/backend
    ```
 
