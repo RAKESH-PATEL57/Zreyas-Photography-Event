@@ -28,8 +28,6 @@ const Footer = () => {
           <div className="footer-section">
             <h4>Contact</h4>
             <a href="" className="footer-link">Rakesh Patel - 9556615902</a>
-            <a href="" className="footer-link">Deepak Mundari - 7008123307</a>
-            <a href="" className="footer-link">Biswajit Rout</a>
           </div>
         </div>
         
