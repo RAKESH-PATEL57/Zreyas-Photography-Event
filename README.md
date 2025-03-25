@@ -2,7 +2,7 @@
 
 A full-stack web application for organizing and managing photography competitions with fair voting mechanisms. This platform allows participants to upload photos while designated admins can vote for their favorites and superadmin declair the winner.
 
-## Live Demo
+<!-- ## Live Demo -->
 <!-- [Photography Contest Platform](https://photography-contest-q18x.onrender.com/) -->
 
 ## Features
