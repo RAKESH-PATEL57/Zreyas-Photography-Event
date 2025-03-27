@@ -75,21 +75,7 @@ const initAdmins = async () => {
           //         password: '40',
           //         isSuperAdmin: false
           //       })
-          //     );
-          // adminPromises.push(
-          //       Admin.create({
-          //         username: '41',
-          //         password: '41',
-          //         isSuperAdmin: false
-          //       })
-          //     );
-          // adminPromises.push(
-          //       Admin.create({
-          //         username: '45',
-          //         password: '45',
-          //         isSuperAdmin: false
-          //       })
-          //     );      
+          //     ); 
           await Promise.all(adminPromises);
           console.log(`${adminsToCreate} admin users created`);
             
@@ -98,24 +84,6 @@ const initAdmins = async () => {
     console.error('Error managing admin users:', err);
   }
 };
-
-
-
-// const fixSuperAdmin = async () => {
-//   try {
-//     const Admin = require('./models/Admin');
-//     const result = await Admin.updateOne(
-//       { username: 'superadmin' },
-//       { $set: { role: 'superadmin', isSuperAdmin: true } }
-//     );
-//     console.log('Super admin fix attempted:', result);
-//   } catch (err) {
-//     console.error('Error fixing super admin:', err);
-//   }
-// };
-
-// // Call this function
-// fixSuperAdmin();
 
 // Create uploads directory if it doesn't exist
 const uploadsDir = path.join(__dirname, 'uploads');
